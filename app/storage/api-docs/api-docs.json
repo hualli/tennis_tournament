@@ -1,0 +1,183 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Swagger",
+        "description": "Tennis tournament simulator API",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080"
+        }
+    ],
+    "paths": {
+        "/api/playTournament": {
+            "post": {
+                "tags": [
+                    "Tournament"
+                ],
+                "summary": "Play new tournament",
+                "description": "Play and save a new tournament",
+                "operationId": "6e59c3e22a12aed9b6099da25f9a0078",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category",
+                                    "players"
+                                ],
+                                "properties": {
+                                    "category": {
+                                        "type": "string",
+                                        "example": "female"
+                                    },
+                                    "players": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Juana Garcia"
+                                                },
+                                                "skill_level": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "strength": {
+                                                    "type": "integer",
+                                                    "example": 40
+                                                },
+                                                "travel_speed": {
+                                                    "type": "integer",
+                                                    "example": 9
+                                                },
+                                                "reaction_time": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "example": [
+                                            {
+                                                "name": "Laura Perez",
+                                                "skill_level": 60,
+                                                "strength": 50,
+                                                "travel_speed": 10,
+                                                "reaction_time": 2
+                                            },
+                                            {
+                                                "name": "Juana Garcia",
+                                                "skill_level": 50,
+                                                "strength": 40,
+                                                "travel_speed": 9,
+                                                "reaction_time": 2
+                                            }
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Record created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TournamentResouce"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/getTournament": {
+            "get": {
+                "tags": [
+                    "Tournament"
+                ],
+                "summary": "Get list of Tournament",
+                "description": "Return list of Tournament",
+                "operationId": "88c95429e860d7c83dba8696cf2717e9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date",
+                                    "category"
+                                ],
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-08-24"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "example": "male"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Succesful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TournamentResouce"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TournamentResouce": {
+                "properties": {
+                    "id": {
+                        "description": "Id of the tournament",
+                        "type": "integer"
+                    },
+                    "date": {
+                        "description": "Date of the tournament",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "category": {
+                        "description": "Category of the tournament",
+                        "type": "string"
+                    },
+                    "winner": {
+                        "description": "Winner of the tournament",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Tournament",
+            "description": "Tournament"
+        }
+    ]
+}

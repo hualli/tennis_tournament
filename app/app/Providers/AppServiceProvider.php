@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(TournamentRepositoryInterface::class, TournamentRepository::class);
         $this->app->bind(GameRepositoryInterface::class, GameRepository::class);
+        $this->app->register(\L5Swagger\L5SwaggerServiceProvider::class);
     }
 
     /**

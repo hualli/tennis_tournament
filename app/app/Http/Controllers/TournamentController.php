@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\InputTournamentRequest;
 use App\Http\Requests\FindTournamentRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\InputTournamentRequest;
+use App\Http\Resources\TournamentResouce;
 use App\Interfaces\TournamentRepositoryInterface;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+/**
+ * @OA\Info(
+ *      title="API Swagger",
+ *      version="1.0",
+ *      description="Tennis tournament simulator API"
+ * )
+ *
+ * @OA\Server(url="http://localhost:8080")
+ */
 
 class TournamentController extends Controller
 {
@@ -19,6 +30,51 @@ class TournamentController extends Controller
         $this->repository = $repository;
         $this->game = app(GameController::class);
     }
+
+    /**
+ * @OA\Post(
+ *     path="/api/playTournament",
+ *     tags={"Tournament"},
+ *     summary="Play new tournament",
+ *     description="Play and save a new tournament",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             required={"category", "players"},
+ *             @OA\Property(property="category", type="string", example="female"),
+ *             @OA\Property(
+ *                property="players",
+ *                type="array",
+ *                example={{
+ *                  "name": "Laura Perez",
+ *                  "skill_level": 60,
+ *                  "strength": 50,
+ *                  "travel_speed": 10,
+ *                  "reaction_time": 2
+ *                },{
+ *                  "name": "Juana Garcia",
+ *                  "skill_level": 50,
+ *                  "strength": 40,
+ *                  "travel_speed": 9,
+ *                  "reaction_time": 2
+ *                }},
+ *                @OA\Items(
+ *                      @OA\Property(property="name", type="string", example="Juana Garcia"),
+ *                      @OA\Property(property="skill_level", type="integer", example=50),
+ *                      @OA\Property(property="strength", type="integer", example=40),
+ *                      @OA\Property(property="travel_speed", type="integer", example=9),
+ *                      @OA\Property(property="reaction_time", type="integer", example=2),
+ *                ),
+ *             ),
+ *         ),
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Record created successfully",
+ *         @OA\JsonContent(ref="#/components/schemas/TournamentResouce")
+ *     )
+ * )
+ */
 
     public function playTournament(InputTournamentRequest $request)
     {
@@ -65,7 +121,7 @@ class TournamentController extends Controller
                     "playerTwo" => $playersArray[$i + 1],
                 ]);
 
-                \Log::info($playersArray[$i]['name'].' vs '.$playersArray[$i+1]['name']);
+                \Log::info($playersArray[$i]['name'] . ' vs ' . $playersArray[$i + 1]['name']);
 
                 $winner = $this->game->playGame($data);
 
@@ -83,16 +139,16 @@ class TournamentController extends Controller
         $tournamentData = [
             'date' => Carbon::now(),
             'category' => $request->category,
-            'winner' => $winners[0]['name']
+            'winner' => $winners[0]['name'],
         ];
 
         $this->store($tournamentData);
 
         return response()->json([
             'success' => true,
-            'message' => 'Winner: '.$winners[0]['name'],
-        ],200);
-        
+            'message' => 'Winner: ' . $winners[0]['name'],
+        ], 200);
+
     }
 
     public function store(array $data)
@@ -104,10 +160,35 @@ class TournamentController extends Controller
         } catch (\Exception $ex) {
             DB::rollBack();
             return response()->json([
-                'error' => 'Error: '.$ex
-            ],500);
+                'error' => 'Error: ' . $ex,
+            ], 500);
         }
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/getTournament",
+     *     tags={"Tournament"},
+     *     summary="Get list of Tournament",
+     *     description="Return list of Tournament",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"date", "category"},
+     *             @OA\Property(property="date", type="date", example="2024-08-24"),
+     *             @OA\Property(property="category", type="string", example="male")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succesful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(ref="#/components/schemas/TournamentResouce")
+     *         )
+     *      )
+     * )
+     */
 
     public function getTournament(FindTournamentRequest $request)
     {
@@ -116,13 +197,13 @@ class TournamentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => '',
-                'data' => json_encode($data)
-            ],200);
+                'data' => TournamentResouce::collection($data),
+            ], 200);
         } catch (\Exception $ex) {
             DB::rollBack();
             return response()->json([
-                'error' => 'Error: '.$ex
-            ],500);
+                'error' => 'Error: ' . $ex,
+            ], 500);
         }
     }
 }
