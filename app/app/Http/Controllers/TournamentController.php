@@ -3,14 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\InputTournamentRequest;
+use App\Http\Requests\FindTournamentRequest;
 use Illuminate\Http\Request;
+use App\Interfaces\TournamentRepositoryInterface;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class TournamentController extends Controller
 {
     protected $game;
+    protected $repository;
 
-    public function __construct()
+    public function __construct(TournamentRepositoryInterface $repository)
     {
+        $this->repository = $repository;
         $this->game = app(GameController::class);
     }
 
@@ -74,18 +80,49 @@ class TournamentController extends Controller
             $playerCount = $playerCount / 2;
         }
 
-        return response()->json([
-            'mensaje' => 'Winner: '.$winners[0]['name'],
-        ]);
+        $tournamentData = [
+            'date' => Carbon::now(),
+            'category' => $request->category,
+            'winner' => $winners[0]['name']
+        ];
 
+        $this->store($tournamentData);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winner: '.$winners[0]['name'],
+        ],200);
+        
     }
 
-    public function getTournament()
+    public function store(array $data)
     {
+        DB::beginTransaction();
+        try {
+            $tournament = $this->repository->store($data);
+            DB::commit();
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error: '.$ex
+            ],500);
+        }
+    }
 
-        return response()->json([
-            'mensaje' => 'entraste a getTournament',
-        ]);
-
+    public function getTournament(FindTournamentRequest $request)
+    {
+        try {
+            $data = $this->repository->getTournament($request->all());
+            return response()->json([
+                'success' => true,
+                'message' => '',
+                'data' => json_encode($data)
+            ],200);
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Error: '.$ex
+            ],500);
+        }
     }
 }
