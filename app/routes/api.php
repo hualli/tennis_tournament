@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TournamentController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -12,3 +14,6 @@ Route::get('/prueba', function () {
         'mensaje' => 'La API está funcionando correctamente'
     ]);
 });
+
+Route::post('/playTournament', [TournamentController::class, 'playTournament']);
+Route::get('/getTournament', [TournamentController::class, 'getTournament']);
